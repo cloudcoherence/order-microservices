@@ -1,0 +1,55 @@
+service: orderMicroservices
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1
+  stage: dev
+  environment:
+    orderDetailTable: orderDetail-${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource:
+        - arn:aws:dynamodb:eu-west-1:*:table/${self:provider.environment.orderDetailTable}  
+
+functions:
+  processOrder:
+    handler: handler.ingestOrder
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - FetchOrder
+              - Arn
+          batchSize: 1
+
+  fetchOrder:
+    handler: handler.fetchOrder
+    events:
+      - http:
+          path: orders/{orderId}
+          method: get
+          cors: true        
+
+resources:
+  Resources:
+    FetchOrder:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: FetchOrder
+
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.orderDetailTable}
+        AttributeDefinitions:
+          - AttributeName: orderId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: orderId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST        
+
