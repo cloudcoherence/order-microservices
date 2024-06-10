@@ -47,7 +47,7 @@ resources:
         TableName: ${self:provider.environment.orderDetailTable}
         AttributeDefinitions:
           - AttributeName: orderId
-            AttributeType: N
+            AttributeType: S
         KeySchema:
           - AttributeName: orderId
             KeyType: HASH

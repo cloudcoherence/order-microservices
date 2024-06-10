@@ -12,7 +12,7 @@ module.exports.ingestOrder = async (event) => {
     const params = {
       TableName: tableName,
       Item: {
-        orderId: randomSixDigitNumber,
+        orderId: uuidv4(),
         orderCreatedDate: new Date().toISOString(),
         systemEvent: order.systemEvent,
         fact: order.fact,
@@ -21,10 +21,10 @@ module.exports.ingestOrder = async (event) => {
 
     try {
       await dynamoDB.put(params).promise();
-      console.log(`Order with ID ${randomSixDigitNumber} saved successfully.`);
+      console.log(`Order with ID ${params.Item.orderId} saved successfully.`);
     } catch (error) {
       console.error(
-        `Failed to save order with ID ${randomSixDigitNumber}: `,
+        `Failed to save order with ID ${params.Item.orderId}: `,
         error
       );
     }
@@ -70,7 +70,3 @@ module.exports.fetchOrder = async (event) => {
     };
   }
 };
-
-function generateRandomSixDigitNumber() {
-  return Math.floor(100000 + Math.random() * 900000);
-}
