@@ -4,8 +4,6 @@ const { v4: uuidv4 } = require("uuid");
 
 module.exports.ingestOrder = async (event) => {
   const tableName = process.env.orderDetailTable;
-  const randomSixDigitNumber = generateRandomSixDigitNumber();
-
   for (const record of event.Records) {
     const order = JSON.parse(record.body);
 
